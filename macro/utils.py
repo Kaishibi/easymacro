@@ -8,7 +8,7 @@ class ScreenCoordinates:
     @staticmethod
     def center(*, monitor: int = 0):
         monitors = win32api.EnumDisplayMonitors()
-        if len(monitors) - 1 > monitor or monitor < 0:
+        if monitor > len(monitors) - 1 or monitor < 0:
             raise TypeError("Invalid monitor.")
         dimensions = monitors[monitor][2]
         _, _, x, y = dimensions
