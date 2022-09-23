@@ -27,6 +27,12 @@ class Window:
     
     @staticmethod
     def find_by_class(clazz: str):
+        windows = []
+        def callback(hwnd: int, _):
+            window = Window(hwnd)
+            if clazz.lower() in window.get_class().lower():
+                windows.append(window)
+        win32gui.EnumWindows(callback, None)
         return Window(win32gui.FindWindow(clazz, None))
 
     @staticmethod
