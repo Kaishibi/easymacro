@@ -1,11 +1,15 @@
 from .utils import ScreenCoordinates
+from .mouse import Mouse
 from win32 import win32gui, win32process
 from win32.lib import win32con
 
 class Window:
-    def __init__(self, hwnd: int) -> None:
+    def __init__(self, hwnd) -> None:
         self.hwnd = hwnd
         if self.hwnd == 0: self.hwnd = None
+    
+    def __eq__(self, __o: object) -> bool:
+        return self.get_hwnd() == __o.get_hwnd()
     
     @staticmethod
     def get_current():
@@ -13,7 +17,13 @@ class Window:
     
     @staticmethod
     def find_by_title(title: str):
-        return Window(win32gui.FindWindow(None, title))
+        windows = []
+        def callback(hwnd: int, _):
+            window = Window(hwnd)
+            if title.lower() in window.get_title().lower():
+                windows.append(window)
+        win32gui.EnumWindows(callback, None)
+        return windows
     
     @staticmethod
     def find_by_class(clazz: str):
@@ -47,6 +57,9 @@ class Window:
     def set_title(self, title: str) -> None:
         win32gui.SetWindowText(self.get_hwnd(), title)
     
+    def get_mouse(self) -> Mouse:
+        return Mouse(window=self)
+    
     def set_position(self, *, coordinates: ScreenCoordinates, center: bool = True) -> None:
         x, y = coordinates.__tuple__()
         win_x, win_y, girth, length = win32gui.GetWindowRect(self.get_hwnd())
@@ -60,7 +73,7 @@ class Window:
         return Window.get_current().get_hwnd() == self.get_hwnd()
 
     def activate(self) -> None:
-        win32gui.SetForegroundWindow(self.get_hwnd())
+        win32gui.ShowWindow(self.get_hwnd(), win32con.SW_SHOW)
     
     def close(self) -> None:
         win32gui.PostMessage(self.get_hwnd(), win32con.WM_CLOSE, 0, 0)

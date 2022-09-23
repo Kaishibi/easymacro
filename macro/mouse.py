@@ -1,18 +1,10 @@
-from .utils import ScreenCoordinates
+from .window import Window
+from .utils import ScreenCoordinates, MouseButtons
 from win32 import win32gui, win32api
-from win32.lib import win32con
-
-class MouseButtons:
-    def _register(down, up) -> dict:
-        return {"down": down, "up": up}
-
-    Left = _register(win32con.MOUSEEVENTF_LEFTDOWN, win32con.MOUSEEVENTF_LEFTUP)
-    Right = _register(win32con.MOUSEEVENTF_RIGHTDOWN, win32con.MOUSEEVENTF_RIGHTUP)
-    Middle = _register(win32con.MOUSEEVENTF_MIDDLEDOWN, win32con.MOUSEEVENTF_MIDDLEUP)
-    Extra = _register(win32con.MOUSEEVENTF_XDOWN, win32con.MOUSEEVENTF_XUP)
 
 class Mouse:
-    def __init__(self) -> None:
+    def __init__(self, *, window: Window = None) -> None:
+        self.window = window
         self.clipped = False
     
     def get_position(self) -> ScreenCoordinates:
@@ -39,25 +31,30 @@ class Mouse:
         win32api.ClipCursor((0, 0, 0, 0))
         self.clipped = False
 
-    def click_down(self, *, coordinates: ScreenCoordinates, button: MouseButtons) -> None:
-        if type(button) is not dict:
-            raise TypeError("Argument 'button' cannot be the MouseButtons class itself.")
+    def click_down(self, *, window: Window = None, coordinates: ScreenCoordinates = None, button: MouseButtons) -> None:
+        if coordinates is None:
+            coordinates = self.get_position()
+        if window is None:
+            if self.window is not None:
+                window = self.window
+            else:
+                window = Window.get_current()
 
-        self.clip(coordinates=coordinates, set_position=True)
-        win32api.mouse_event(button["down"] | win32con.MOUSEEVENTF_ABSOLUTE, 0, 0)
-        self.unclip()
+        longcoords = win32api.MAKELONG(coordinates.x, coordinates.y)
+        win32gui.SendMessage(window.get_hwnd(), button.down, button.key, longcoords)
     
-    def click_up(self, *, coordinates: ScreenCoordinates, button: MouseButtons) -> None:
-        if type(button) is not dict:
-            raise TypeError("Argument 'button' cannot be the MouseButtons class itself.")
+    def click_up(self, *, window: Window = None, coordinates: ScreenCoordinates = None, button: MouseButtons) -> None:
+        if coordinates is None:
+            coordinates = self.get_position()
+        if window is None:
+            if self.window is not None:
+                window = self.window
+            else:
+                window = Window.get_current()
 
-        self.clip(coordinates=coordinates, set_position=True)
-        win32api.mouse_event(button["up"] | win32con.MOUSEEVENTF_ABSOLUTE, 0, 0)
-        self.unclip()
+        longcoords = win32api.MAKELONG(coordinates.x, coordinates.y)
+        win32gui.SendMessage(window.get_hwnd(), button.up, None, longcoords)
     
-    def click(self, *, coordinates: ScreenCoordinates, button: MouseButtons, reset_position: bool = False) -> None:
-        initial_pos = self.get_position()
-        self.click_down(coordinates=coordinates, button=button)
+    def click(self, *, window: Window = None, coordinates: ScreenCoordinates = None, button: MouseButtons) -> None:
+        self.click_down(window=window, coordinates=coordinates, button=button)
         self.click_up(coordinates=coordinates, button=button)
-        if reset_position:
-            self.set_position(initial_pos)
