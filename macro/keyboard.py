@@ -1,2 +1,5 @@
+from macro import Window
+
 class Keyboard:
-    pass
+    def __init_(self, *, window: Window = None):
+        self.window = window

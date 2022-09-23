@@ -1,2 +1,6 @@
+build/
+dist/
+easymacro.egg-info/
+
 __pycache__/
 test.py

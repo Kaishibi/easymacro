@@ -10,7 +10,7 @@ version = "0.0.1"
 description = "Easily make macros in Python!"
 
 setup(
-    name="macro.py",
+    name="easymacro",
     version=version,
     author="Wurgo, Languste27",
     author_email="<wurgoalt@gmail.com>",
@@ -20,9 +20,5 @@ setup(
     packages=find_packages(),
     install_requires=["pywin32"],
     keywords=["python", "macro", "windows", "mouse", "keyboard", "input"],
-    classifiers=[
-        "Intended Audience :: Developers",
-        "Programming Language :: Python3",
-        "Operating System :: Windows"
-    ]
+    classifiers=[]
 )
