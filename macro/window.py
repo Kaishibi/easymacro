@@ -1,5 +1,4 @@
 from .utils import ScreenCoordinates
-from .mouse import Mouse
 from win32 import win32gui, win32process
 from win32.lib import win32con
 
@@ -7,14 +6,14 @@ class Window:
     def __init__(self, hwnd) -> None:
         self.hwnd = hwnd
         if self.hwnd == 0: self.hwnd = None
-    
+
     def __eq__(self, __o: object) -> bool:
         return self.get_hwnd() == __o.get_hwnd()
-    
+
     @staticmethod
     def get_current():
         return Window(win32gui.GetForegroundWindow())
-    
+
     @staticmethod
     def find_by_title(title: str):
         windows = []
@@ -24,7 +23,7 @@ class Window:
                 windows.append(window)
         win32gui.EnumWindows(callback, None)
         return windows
-    
+
     @staticmethod
     def find_by_class(clazz: str):
         windows = []
@@ -38,11 +37,11 @@ class Window:
     @staticmethod
     def exists_by_title(title: str):
         return Window.find_by_title(title).get_hwnd() is not None
-    
+
     @staticmethod
     def exists_by_class(clazz: str):
         return Window.find_by_class(clazz).get_hwnd() is not None
-    
+
     def exists(self) -> bool:
         return self.get_hwnd() is not None
 
@@ -53,19 +52,16 @@ class Window:
         result = win32process.GetWindowThreadProcessId(self.get_hwnd())
         if len(result) > 0: return result[1]
         else: return None
-    
+
     def get_class(self) -> str:
         return win32gui.GetClassName(self.get_hwnd())
 
     def get_title(self) -> str:
         return win32gui.GetWindowText(self.get_hwnd())
-    
+
     def set_title(self, title: str) -> None:
         win32gui.SetWindowText(self.get_hwnd(), title)
-    
-    def get_mouse(self) -> Mouse:
-        return Mouse(window=self)
-    
+
     def set_position(self, *, coordinates: ScreenCoordinates, center: bool = True) -> None:
         x, y = coordinates.__tuple__()
         win_x, win_y, girth, length = win32gui.GetWindowRect(self.get_hwnd())
@@ -80,7 +76,7 @@ class Window:
 
     def activate(self) -> None:
         win32gui.ShowWindow(self.get_hwnd(), win32con.SW_SHOW)
-    
+
     def close(self) -> None:
         win32gui.PostMessage(self.get_hwnd(), win32con.WM_CLOSE, 0, 0)
 
